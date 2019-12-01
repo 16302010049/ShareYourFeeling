@@ -3,28 +3,28 @@
      <el-form-item label="头像" required>
        <el-upload
          class="avatar-uploader"
-         action="https://jsonplaceholder.typicode.com/posts/"
+         action=""
          :show-file-list="false"
          :on-success="handleAvatarSuccess"
          :before-upload="beforeAvatarUpload">
-         <img v-if="imageUrl" :src="imageUrl" class="avatar">
+         <img v-if="imageUrl" :src="imageUrl" class="avatar" alt="Your avatar">
          <i v-else class="el-icon-plus avatar-uploader-icon"></i>
        </el-upload>
      </el-form-item>
-     <el-form-item label="用户名" required>
+     <el-form-item label="用户名" prop="name" required>
        <el-input v-model="form.name" class="messageInput" clearable></el-input>
      </el-form-item>
-    <el-form-item label="邮箱" required>
+    <el-form-item label="邮箱" prop="mailbox" required>
       <el-input v-model="form.mailbox" class="messageInput" clearable></el-input>
     </el-form-item>
-    <el-form-item label="性别" required>
+    <el-form-item label="性别" prop="sex" required>
       <el-select v-model="form.sex" placeholder="请选择性别"  class="fontclass">
         <el-option label="男" value="male"></el-option>
         <el-option label="女" value="female"></el-option>
       </el-select>
     </el-form-item>
-    <el-form-item label="生日" required>
-        <el-date-picker type="date" placeholder="选择日期" v-model="form.date1" style="width: 100%;"></el-date-picker>
+    <el-form-item label="生日" prop="birthday" required>
+        <el-date-picker type="date" placeholder="选择日期" v-model="form.birthday" style="width: 100%;"></el-date-picker>
       </el-form-item>
     <el-form-item label="签名" required>
       <el-input v-model="form.signature" class="messageInput" clearable></el-input>
@@ -51,9 +51,41 @@ export default {
   name: 'registerform',
   components: {Tags},
   data () {
-    var validatePass = (rule, value, callback) => {
+    var validateName = (rule, value, callback) => {
+      if (value.length === 0 || value.length > 10) {
+        console.log(value)
+        callback(new Error('用户名应为1到10个字符'))
+      } else {
+        callback()
+      }
+    }
+    var validateMailbox = (rule, value, callback) => {
+      var ePattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/
+      if (!ePattern.test(value)) {
+        callback(new Error('邮箱格式错误'))
+      } else {
+        callback()
+      }
+    }
+    var validateSex = (rule, value, callback) => {
       if (value === '') {
-        callback(new Error('请输入密码'))
+        callback(new Error('未选择性别'))
+      } else {
+        callback()
+      }
+    }
+    var validateBirthday = (rule, value, callback) => {
+      if (value === '') {
+        console.log(value)
+        callback(new Error('未选择生日'))
+      } else {
+        callback()
+      }
+    }
+    var validatePass = (rule, value, callback) => {
+      var pPattern = /^.*(?=.{6,})(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*? ]).*$/
+      if (!pPattern.test(value)) {
+        callback(new Error('密码至少6位，并且包含大小写字母与特殊字符'))
       } else {
         if (this.form.checkPass !== '') {
           this.$refs.form.validateField('checkPass')
@@ -79,11 +111,23 @@ export default {
         sex: '',
         pass: '',
         checkpass: '',
-        date1: '',
+        birthday: '',
         signature: '',
         tags: []
       },
       rules: {
+        name: [
+          {validator: validateName, trigger: 'blur'}
+        ],
+        mailbox: [
+          {validator: validateMailbox, trigger: 'blur'}
+        ],
+        sex: [
+          {validator: validateSex, trigger: 'blur'}
+        ],
+        birthday: [
+          {validator: validateBirthday, trigger: 'blur'}
+        ],
         pass: [
           { validator: validatePass, trigger: 'blur' }
         ],
@@ -106,6 +150,9 @@ export default {
       }
       if (!isLt2M) {
         this.$message.error('上传头像图片大小不能超过 2MB!')
+      }
+      if (isJPG && isLt2M) {
+        this.imageUrl = URL.createObjectURL(file)
       }
       return isJPG && isLt2M
     },
