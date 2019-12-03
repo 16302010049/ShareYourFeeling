@@ -21,7 +21,7 @@
           <span>{{input.time}}</span>
         </div>
       </el-col>
-      <el-col :span="12" style="color: white">emmmm</el-col>
+      <el-col :span="12" style="color: white;cursor: pointer" @click.native="jumptodetail">emmmm</el-col>
       <el-col :span="6"  @click.native="jumptodetail" style="cursor: pointer">
         <div id="icons">
           <i class="el-icon-position"></i>
@@ -50,6 +50,7 @@ export default {
   props: ['input'],
   methods: {
     jumptodetail () {
+      this.$cookies.set('blogInfo', this.$props.input)
       this.$router.push('/detail')
     },
     mark () {

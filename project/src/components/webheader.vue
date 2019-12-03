@@ -17,7 +17,7 @@
         <el-menu-item index="4" @click.native="goToFriend">好友推荐</el-menu-item>
       </el-menu>
     </el-col>
-    <div v-if="hasLogin === '1'">
+    <div v-if="user===''">
       <el-col :span="13">
         <div style="color:#409EFF;">Space</div>
       </el-col>
@@ -32,7 +32,7 @@
         </div>
       </el-col>
     </div>
-    <div v-if="hasLogin === '2'">
+    <div v-if="user!==''">
       <el-col :span="13">
         <div style="color:#409EFF;">Space</div>
       </el-col>
@@ -42,7 +42,7 @@
       <el-col :span="1">
         <el-dropdown>
           <div class="el-dropdown-link">
-            我的<i class="el-icon-arrow-down el-icon--right"></i>
+            {{user.name}}<i class="el-icon-arrow-down el-icon--right"></i>
           </div>
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item icon="el-icon-s-home" @click.native="goToSelf">主页</el-dropdown-item>
@@ -65,25 +65,31 @@ export default {
       activeIndex: '0',
       activeIndex2: '0',
       circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-      hasLogin: '2'
+      user: ''
     }
   },
   created () {
-    this.hasLogin = this.$cookies.isKey('login') ? this.$cookies.get('login') : '1'
-    console.log(this.hasLogin)
+    console.log(this.$cookies.get('user'))
+    this.user = this.$cookies.isKey('user') ? this.$cookies.get('user') : ''
+    this.$store.commit('editUser', this.user)
+    if (this.user !== '') {
+      this.circleUrl = this.user.imageurl
+    }
+    console.log(this.user.imageurl)
   },
   computed: {
     /**
      * @return {boolean}
      */
-    ListenLogin () {
-      return this.$store.state.haslogin
+    ListenUser () {
+      return this.$store.state.user
     }
   },
   watch: {
-    ListenLogin: function (old) {
-      this.hasLogin = old
-      console.log(this.hasLogin)
+    ListenUser: function (old) {
+      this.user = old
+      if (this.user !== null) { this.circleUrl = this.user.imageurl === undefined ? 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png' : this.user.imageurl } else { this.circleUrl = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png' }
+      console.log(this.user)
     }
   },
   methods: {
@@ -115,9 +121,10 @@ export default {
       this.$router.push('/findfriend')
     },
     logout () {
-      this.$store.commit('editLogin', '1')
-      console.log(this.$store.state.haslogin)
-      this.$cookies.set('login', '1')
+      this.$store.commit('editUser', '')
+      console.log(this.$store.state.user)
+      this.$cookies.remove('user')
+      this.$message.success('成功退出')
       this.$router.push('/login')
     }
   }

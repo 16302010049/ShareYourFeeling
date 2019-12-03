@@ -5,11 +5,11 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
-    haslogin: 0
+    user: ''
   },
   mutations: {
-    'editLogin': function (state, loginstate) {
-      state.haslogin = loginstate
+    'editUser': function (state, usr) {
+      state.user = usr
     }
   },
   getters: {

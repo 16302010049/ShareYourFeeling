@@ -8,7 +8,9 @@ import router from './router'
 import VueCookies from 'vue-cookies'
 import store from './stagestore'
 import axios from 'axios'
+import qs from 'qs.js'
 Vue.prototype.$axios = axios
+Vue.prototype.qs = qs
 
 Vue.use(ElementUI)
 Vue.use(VueCookies)

@@ -4,7 +4,7 @@
       <el-col :span="3"  @click.native = jumptodetail style="cursor: pointer">
         <el-image
           style="width: 100px; height: 100px"
-          :src="input.url"
+          :src="input.photoUrlList[0]"
           fit="fill"></el-image>
       </el-col>
       <el-col :span="21">
@@ -19,15 +19,15 @@
           </el-col>
         </el-row>
         <el-row id="writter" style="vertical-align: middle" >
-          <el-col :span="6" @click.native="jumpToSelf" style="cursor: pointer">
+          <el-col :span="8" @click.native="jumpToSelf" style="cursor: pointer">
             <div>
               <el-avatar :size="30" :src="input.avatarurl" id="avatar"></el-avatar>
               <span>{{input.name}}</span>
               <span>{{input.time}}</span>
             </div>
           </el-col>
-          <el-col :span="10" style="color: white">just for space</el-col>
-          <el-col :span="8">
+          <el-col :span="9" style="color: white;cursor: pointer" @click.native="jumptodetail">just for space</el-col>
+          <el-col :span="7">
             <div id="icons"  @click = jumptodetail style="cursor: pointer">
               <i class="el-icon-position"></i>
               <span>{{input.trannum}}</span>
@@ -55,6 +55,7 @@ export default {
   props: ['input'],
   methods: {
     jumptodetail () {
+      this.$cookies.set('blogInfo', this.$props.input)
       this.$router.push('/detail')
     },
     mark () {

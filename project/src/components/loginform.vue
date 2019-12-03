@@ -28,7 +28,6 @@ export default {
         name: '',
         password: ''
       },
-      usr: {},
       rules: {
         name: [{required: true, message: '请输入用户名', trigger: 'blur'}],
         password: [{required: true, validator: validatePass, trigger: 'blur'}]
@@ -39,35 +38,35 @@ export default {
     submitForm (formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          var req = {
+            username: this.form.name,
+            password: this.form.password
+          }
           var that = this
           this.$axios
-            .post('http://localhost:8080/login', {name: that.form.name, password: that.form.password})
+            .post('http://localhost:8080/user/login', req)
             .then((response) => {
               console.log(response)
-              that.usr = response.data
-              if (that.usr) {
-                that.$options.methods.loginin(that)
-              } else {
+              var res = response.data
+              if (res.info === '用户名或密码错误') {
                 that.$message.error('用户名或密码错误')
+              } else {
+                this.$message.success('登录成功')
+                that.$cookies.set('user', res.user)
+                that.$store.commit('editUser', res.user)
+                that.$router.push('/')
               }
             })
             .catch(function (error) { // 请求失败处理
               console.log(error)
               console.log(that.form.name)
               that.$message.error('网络错误')
-              that.$options.methods.loginin(that)
             })
         } else {
           console.log('error submit!!')
           return false
         }
       })
-    },
-    loginin (context) {
-      context.$cookies.set('login', '2')
-      context.$store.commit('editLogin', '2')
-      console.log(context.$store.state.haslogin)
-      context.$router.push('/')
     }
   }
 }

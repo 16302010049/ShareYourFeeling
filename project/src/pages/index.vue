@@ -1,8 +1,8 @@
 <template>
       <el-main>
       <el-container>
-        <el-aside width="200px">
-              <el-menu
+        <el-aside width="300px">
+              <!--<el-menu
                 default-active="1"
                 class="el-menu-vertical-demo"
                 @open="handleOpen"
@@ -50,30 +50,32 @@
                   <i class="el-icon-menu"></i>
                   <span slot="title">生活</span>
                 </el-menu-item>
-              </el-menu>
+              </el-menu>-->
         </el-aside>
         <el-main>
           <el-row id="searchme">
-            <el-col :span="5">
+            <el-col :span="7">
               <span style="color: white">Space</span>
             </el-col>
           <el-col :span="10" >
-          <el-input v-model="input" placeholder="搜索感兴趣的内容" ></el-input>
-          </el-col>
-          <el-col :span="2">
-          <el-button type="primary" icon="el-icon-search">搜索</el-button>
+          <el-input v-model="input" placeholder="搜索感兴趣的内容或人" prefix-icon="el-icon-search" @input="handleInputChange"></el-input>
           </el-col>
           </el-row>
-          <card-without-picture  id="test"  :input="cardInputType1" ></card-without-picture>
-          <cardwithonepicture :input="cardInputType2"></cardwithonepicture>
-          <cardwithpictures :input="cardInputType3"></cardwithpictures>
+          <div v-for="card in cardInput" :key="card">
+            <card-without-picture v-if="card.photoUrlList.length ===0" :input="card"></card-without-picture>
+            <cardwithonepicture v-if="card.photoUrlList.length ===1" :input="card"></cardwithonepicture>
+            <cardwithpictures v-if="card.photoUrlList.length>1" :input="card"></cardwithpictures>
+          </div>
           <el-pagination
-            background
+            @current-change = "handlePageChange"
+              background
+            :current-page="currentPage"
             layout="prev, pager, next"
-            :total="1000" id="pages">
+            :page-count="pageSize" id="pages"
+            >
           </el-pagination>
         </el-main>
-        <el-aside width="400px"></el-aside>
+        <el-aside width="300px"></el-aside>
       </el-container>
       </el-main>
 </template>
@@ -87,41 +89,135 @@ export default {
   data () {
     return {
       input: '',
-      cardInputType1: {
-        url: '',
-        avatarurl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        content: '这是不带图片的微博',
-        name: 'Test',
-        time: '10月31日 21:59',
-        trannum: 114514,
-        chatnum: 114514,
-        zannum: 114514
-      },
-      cardInputType2: {
-        avatarurl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        content: '这是一个带一个图片的微博',
-        name: 'Test',
-        time: '10月31日 21:59',
-        trannum: 114514,
-        chatnum: 114514,
-        zannum: 114514
-      },
-      cardInputType3: {
-        photoUrlList: ['', '', '', '', '', '', ''],
-        avatarurl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        content: '这是一个带多个图片的微博',
-        name: 'Test',
-        time: '10月31日 21:59',
-        trannum: 114514,
-        chatnum: 114514,
-        zannum: 114514
-      }
+      pageSize: 0,
+      cardInput: [],
+      currentPage: 1,
+      isInSearch: false
     }
+  },
+  created () {
+    var first = {
+      pageNum: 1,
+      pageSize: 4
+    }
+    var that = this
+    this.$axios
+      .post('http://localhost:8080/blog/getBlog', first)
+      .then((response) => {
+        that.cardInput = []
+        that.pageSize = response.data.totalPage
+        for (var i = 0; i < response.data.content.length; i++) {
+          console.log(response.data.content[i].avatarUrl)
+          var temp = {
+            id: response.data.content[i].id,
+            photoUrlList: JSON.parse(response.data.content[i].imageList),
+            avatarurl: response.data.content[i].avatarUrl,
+            chatnum: response.data.content[i].commentNum,
+            trannum: response.data.content[i].tranNum,
+            zannum: response.data.content[i].zanNum,
+            name: response.data.content[i].author,
+            content: response.data.content[i].content,
+            time: response.data.content[i].date
+          }
+          console.log(temp)
+          that.cardInput.push(temp)
+        }
+        console.log(that.cardInput)
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
   },
   components: {Cardwithpictures, Cardwithonepicture, CardWithoutPicture},
   methods: {
     jumptodetail () {
       this.$router.push('/detail')
+    },
+    handlePageChange (val) {
+      if (this.input === '') {
+        this.$options.methods.getAllRequest(val, this)
+      } else {
+        this.$options.methods.searchBlogByStr(this, this.input, val)
+      }
+    },
+    handleInputChange (val) {
+      if (val !== '') {
+        this.isInSearch = true
+        this.currentPage = 1
+        this.$options.methods.searchBlogByStr(this, val, 1)
+      } else {
+        this.$options.methods.getAllRequest(1, this)
+      }
+    },
+    getAllRequest (val, context) {
+      var first = {
+        pageNum: val,
+        pageSize: 4
+      }
+      var that = context
+      context.$axios
+        .post('http://localhost:8080/blog/getBlog', first)
+        .then((response) => {
+          that.cardInput = []
+          that.pageSize = response.data.totalPage
+          for (var i = 0; i < response.data.content.length; i++) {
+            console.log(response.data.content[i].avatarUrl)
+            var temp = {
+              id: response.data.content[i].id,
+              photoUrlList: JSON.parse(response.data.content[i].imageList),
+              avatarurl: response.data.content[i].avatarUrl,
+              chatnum: response.data.content[i].commentNum,
+              trannum: response.data.content[i].tranNum,
+              zannum: response.data.content[i].zanNum,
+              name: response.data.content[i].author,
+              content: response.data.content[i].content,
+              time: response.data.content[i].date
+            }
+            console.log(temp)
+            that.cardInput.push(temp)
+          }
+          console.log(that.cardInput)
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    searchBlogByStr (context, input, pageNum) {
+      var req = {
+        searchStr: input,
+        pageNum: pageNum,
+        pageSize: 4
+      }
+      var that = context
+      context.$axios
+        .post('http://localhost:8080/blog/searchBlog', req)
+        .then((response) => {
+          that.cardInput = []
+          that.pageSize = response.data.totalPage
+          for (var i = 0; i < response.data.content.length; i++) {
+            console.log(response.data.content[i].avatarUrl)
+            var temp = {
+              id: response.data.content[i].id,
+              photoUrlList: JSON.parse(response.data.content[i].imageList),
+              avatarurl: response.data.content[i].avatarUrl,
+              chatnum: response.data.content[i].commentNum,
+              trannum: response.data.content[i].tranNum,
+              zannum: response.data.content[i].zanNum,
+              name: response.data.content[i].author,
+              content: response.data.content[i].content,
+              time: response.data.content[i].date
+            }
+            console.log(temp)
+            that.cardInput.push(temp)
+          }
+          console.log(that.cardInput)
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
     }
   }
 }
