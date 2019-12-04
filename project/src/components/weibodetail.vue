@@ -41,25 +41,26 @@
         </div>
       </div>
     </el-row>
-    <el-row id="infor">
-      <el-col :span="6" v-if="hasshoucang === '0'" class="shoucang" @click.native="mark()">
+    <el-row id="infor" style="color: #409EFF;margin-top: 100px">
+      <el-col :span="6" v-if="!hasshoucang" class="shoucang" @click.native="mark()">
         <i class="el-icon-star-off"></i>
         <span>收藏</span>
       </el-col>
-      <el-col :span="6" v-if="hasshoucang === '1'" class="shoucang" @click.native="unmark()">
+      <el-col :span="6" v-if="hasshoucang" class="shoucang" @click.native="unmark()">
         <i class="el-icon-star-on"></i>
         <span >取消收藏</span>
       </el-col>
       <el-col :span="6">
-        <i class="el-icon-position"></i>
+        <i class="el-icon-thirdshare resize"></i>
         <span>{{info.trannum}}</span>
       </el-col>
       <el-col :span="6">
-        <i class="el-icon-chat-dot-square"></i>
+        <i class="el-icon-chat-dot-square" style="cursor: pointer" @click="readComment"></i>
         <span>{{info.chatnum}}</span>
       </el-col>
       <el-col :span="6">
-        <i class="el-icon-thumb"></i>
+        <i class="el-icon-thirdgood resize" v-if="!isThumbsUp" style="cursor: pointer" @click="thumbsUp"></i>
+        <i class="el-icon-thirdgood-fill resize" v-if="isThumbsUp" style="cursor: pointer" @click="thumbsDown"></i>
         <span>{{info.zannum
           }}</span>
       </el-col>
@@ -89,7 +90,7 @@
       <el-col :span="10">
         <div class="com">{{comment.content}}</div>
       </el-col>
-      <el-col :span="3"><el-button type="danger" icon="el-icon-circle-close" size="small" >删除</el-button></el-col>
+      <el-col :span="3" v-if="userID === comment.authorID"><el-button type="danger" icon="el-icon-circle-close" size="small"  @click="deleteComment(comment.id)">删除</el-button></el-col>
     </el-row>
     <el-row>
       <el-col :span="4">
@@ -116,6 +117,7 @@ export default {
   name: 'weibodetail',
   created () {
     this.blogID = this.$cookies.get('blogID')
+    this.userID = this.$store.state.user.id
     var that = this
     this.$axios
       .get('http://localhost:8080/blog/getSingleBlog', {params: {'blogID': this.blogID}})
@@ -137,8 +139,7 @@ export default {
         if (that.info.photoUrlList.length > 0) {
           that.bigUrl = this.info.photoUrlList[0]
         }
-      })
-      .catch(function (error) {
+      }).catch(function (error) {
         console.log(error)
         that.$message.error('网络错误')
       })
@@ -171,6 +172,36 @@ export default {
         console.log(error)
         that.$message.error('网络错误')
       })
+    let req = {
+      userID: that.$store.state.user.id,
+      blogID: that.blogID
+    }
+    this.$axios
+      .post('http://localhost:8080/collect/checkCollect', req)
+      .then((response) => {
+        if (response.data.info === 'Yes') {
+          that.hasshoucang = true
+        } else {
+          that.hasshoucang = false
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
+    this.$axios
+      .post('http://localhost:8080/thumbsup/checkThumbsUp', req)
+      .then((response) => {
+        if (response.data.info === 'Yes') {
+          that.isThumbsUp = true
+        } else {
+          that.isThumbsUp = false
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
   },
   data () {
     return {
@@ -181,22 +212,131 @@ export default {
       bigUrl: '',
       comments: [],
       fit: 'fill',
-      hasshoucang: '0',
+      hasshoucang: false,
       pageTotal: 0,
-      currentPage: 1
+      currentPage: 1,
+      userID: 0,
+      isThumbsUp: false
     }
   },
   methods: {
     mark () {
-      this.hasshoucang = '1'
+      let time = new Date()
+      let timestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', time)
+      let req = {
+        userID: this.$store.state.user.id,
+        blogID: this.info.id,
+        time: timestr
+      }
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/collect/addCollect', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('收藏成功')
+            that.hasshoucang = true
+          } else {
+            this.$message.error('收藏失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
       console.log('jfekjf')
     },
     unmark () {
-      this.hasshoucang = '0'
+      let req = {
+        userID: this.$store.state.user.id,
+        blogID: this.info.id
+      }
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/collect/deleteCollect', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.hasshoucang = false
+            that.$message.success('取消收藏成功')
+          } else {
+            that.$message.error('取消收藏失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    thumbsUp () {
+      let req = {
+        userID: this.$store.state.user.id,
+        blogID: this.info.id
+      }
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/thumbsup/addThumbsUp', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.isThumbsUp = true
+            that.$message.success('点赞成功')
+            that.$options.methods.refreshBlog(this, 1)
+          } else {
+            that.$message.error('点赞失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    thumbsDown () {
+      let req = {
+        userID: this.$store.state.user.id,
+        blogID: this.info.id
+      }
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/thumbsup/deleteThumbsUp', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.isThumbsUp = false
+            that.$message.success('取消点赞成功')
+            that.$options.methods.refreshBlog(this, 1)
+          } else {
+            that.$message.error('取消点赞失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    readComment () {
+      this.$options.methods.refreshBlog(this, 1)
     },
     showBigPic (val) {
       this.bigUrl = this.info.photoUrlList[val]
       console.log(this.bigUrl)
+    },
+    deleteComment (val) {
+      var that = this
+      let req = {
+        commentID: val,
+        blogID: this.blogID
+      }
+      this.$axios
+        .post('http://localhost:8080/comment/deleteComment', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('删除成功')
+            that.$options.methods.refreshBlog(this, 1)
+          } else {
+            that.$message.error('删除失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
     },
     dateFtt (fmt, date) { // author: meizz
       var o = {
@@ -237,7 +377,7 @@ export default {
             if (response.data.info === 'success') {
               that.$options.methods.refreshBlog(this, 1)
             } else {
-              this.$message.error('评论失败')
+              that.$message.error('评论失败')
             }
           })
           .catch(function (error) {
@@ -351,4 +491,7 @@ export default {
   .commentInput{
     margin-bottom: 50px;
   }
+ .resize{
+   font-size: 25px;
+ }
 </style>

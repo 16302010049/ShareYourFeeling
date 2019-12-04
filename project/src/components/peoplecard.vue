@@ -2,7 +2,7 @@
     <el-card id="card">
       <el-row>
         <el-col :span="2">
-        <el-avatar :size="60" :src="input.avatarUrl" style="cursor: pointer;" @click.native="jumpToSelf"></el-avatar>
+        <el-avatar :size="60" :src="input.imageurl" style="cursor: pointer;" @click.native="jumpToSelf"></el-avatar>
         </el-col>
         <el-col :span="4">
           <el-row>
@@ -10,7 +10,7 @@
           </el-row>
           <el-row>
             <div style="text-align: left">
-              关注 {{input.gNum}}|粉丝 {{input.fansNum}}|微博 {{input.weiboNum}}
+              关注 {{input.guanNum}}|粉丝 {{input.fansNum}}|微博 {{input.blogNum}}
             </div>
           </el-row>
           <el-row>

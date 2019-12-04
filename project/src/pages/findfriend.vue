@@ -14,14 +14,12 @@
             根据您的标签找的匹配的人如下：
             </div>
           </el-row>
-          <peoplecard :input="cardInput"></peoplecard>
-          <peoplecard :input="cardInput"></peoplecard>
-          <peoplecard :input="cardInput"></peoplecard>
-          <peoplecard :input="cardInput"></peoplecard>
+          <peoplecard v-for="cardInput in cardInputs" :key="cardInput" :input="cardInput"></peoplecard>
           <el-pagination
             background
             layout="prev, pager, next"
-            :total="1000" id="pages">
+            @current-change="handlePageChange"
+            :page-count="pageSize" id="pages">
           </el-pagination>
         </el-main>
         <el-aside width="300px"></el-aside>
@@ -34,9 +32,27 @@ import Peoplecard from '../components/peoplecard'
 export default {
   name: 'findfriend',
   components: {Peoplecard, Tags},
+  created () {
+    let req = {
+      userID: this.$store.state.user.id,
+      pageNum: 1,
+      pageSize: 4
+    }
+    this.cardInputs = []
+    var that = this
+    this.$axios
+      .post('http://localhost:8080/user/getPageUser', req)
+      .then((response) => {
+        that.pageSize = response.data.totalPage
+        that.cardInputs = response.data.content
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+  },
   data () {
     return {
-      cardInput: {
+      cardInputr: {
         avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
         name: 'Test2',
         gNum: 102,
@@ -47,13 +63,33 @@ export default {
         tags: [],
         hasgz: false
       },
+      cardInputs: [],
       tags: [],
-      closeable: true
+      closeable: true,
+      pageSize: 0
     }
   },
   methods: {
     updateTags (data) {
       this.tags = data
+    },
+    handlePageChange (val) {
+      let req = {
+        userID: this.$store.state.user.id,
+        pageNum: val,
+        pageSize: 4
+      }
+      this.cardInputs = []
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/user/getPageUser', req)
+        .then((response) => {
+          that.pageSize = response.data.totalPage
+          that.cardInputs = response.data.content
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     }
   }
 }

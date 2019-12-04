@@ -118,6 +118,13 @@ export default {
               .then((response) => {
                 var res = response.data
                 if (res.info === 'success') {
+                  let temp = this.$store.state.user
+                  let blogNum = this.$store.state.user.blogNum
+                  blogNum++
+                  temp.blogNum = blogNum
+                  that.$cookies.set('user', temp)
+                  that.$store.commit('editUser', temp)
+                  console.log(this.$store.state.user)
                   that.$message.success('发布成功')
                 } else {
                   that.message.error('发布失败')

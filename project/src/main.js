@@ -9,6 +9,8 @@ import VueCookies from 'vue-cookies'
 import store from './stagestore'
 import axios from 'axios'
 import qs from 'qs.js'
+import './assets/icon/iconfont.css'
+
 Vue.prototype.$axios = axios
 Vue.prototype.qs = qs
 

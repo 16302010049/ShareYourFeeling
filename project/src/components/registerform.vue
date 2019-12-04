@@ -191,6 +191,10 @@ export default {
           formdata.append('signature', this.form.signature)
           formdata.append('tags', JSON.stringify(this.form.tags))
           formdata.append('pass', this.form.pass)
+          formdata.append('blogNum', 0)
+          formdata.append('guanNum', 0)
+          formdata.append('fansNum', 0)
+          formdata.append('backgroundUrl', '')
           console.log(formdata.get('file'))
           var that = this
           this.$axios

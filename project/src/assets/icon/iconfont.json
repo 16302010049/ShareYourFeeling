@@ -1,0 +1,30 @@
+{
+  "id": "1545499",
+  "name": "elthirdicon",
+  "font_family": "iconfont",
+  "css_prefix_text": "el-icon-third",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "11488053",
+      "name": "good",
+      "font_class": "good",
+      "unicode": "e753",
+      "unicode_decimal": 59219
+    },
+    {
+      "icon_id": "11488129",
+      "name": "share",
+      "font_class": "share",
+      "unicode": "e764",
+      "unicode_decimal": 59236
+    },
+    {
+      "icon_id": "11488262",
+      "name": "good-fill",
+      "font_class": "good-fill",
+      "unicode": "e780",
+      "unicode_decimal": 59264
+    }
+  ]
+}
