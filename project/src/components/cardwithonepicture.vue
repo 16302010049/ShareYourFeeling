@@ -55,7 +55,7 @@ export default {
   props: ['input'],
   methods: {
     jumptodetail () {
-      this.$cookies.set('blogInfo', this.$props.input)
+      this.$cookies.set('blogID', this.$props.input.id)
       this.$router.push('/detail')
     },
     mark () {

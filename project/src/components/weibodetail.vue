@@ -82,11 +82,11 @@
       <el-col :span="1.5">
         <el-avatar :size="30" :src="comment.avatarUrl"></el-avatar>
       </el-col>
-      <el-col :span="3" >
+      <el-col :span="6" >
         <el-row><div class="infor">{{comment.name}}</div></el-row>
         <el-row><div class="infor">{{comment.time}}</div></el-row>
       </el-col>
-      <el-col :span="12">
+      <el-col :span="10">
         <div class="com">{{comment.content}}</div>
       </el-col>
       <el-col :span="3"><el-button type="danger" icon="el-icon-circle-close" size="small" >删除</el-button></el-col>
@@ -102,8 +102,11 @@
     </div>
     <el-pagination
       background
+      :current-page="currentPage"
+      @current-change="handlePageChange"
       layout="prev, pager, next"
-      :total="1000" id="pages">
+      :page-count="pageTotal"
+      id="pages">
     </el-pagination>
   </el-card>
 </template>
@@ -112,40 +115,75 @@
 export default {
   name: 'weibodetail',
   created () {
-    this.info = this.$cookies.get('blogInfo')
-    if (this.info.photoUrlList.length > 0) {
-      this.bigUrl = this.info.photoUrlList[0]
-    }
+    this.blogID = this.$cookies.get('blogID')
+    var that = this
+    this.$axios
+      .get('http://localhost:8080/blog/getSingleBlog', {params: {'blogID': this.blogID}})
+      .then((response) => {
+        console.log(response)
+        that.info = {
+          id: response.data.id,
+          content: response.data.content,
+          chatnum: response.data.commentNum,
+          trannum: response.data.tranNum,
+          zannum: response.data.zanNum,
+          authorID: response.data.authorID,
+          time: response.data.date,
+          photoUrlList: JSON.parse(response.data.imageList),
+          name: response.data.name,
+          avatarurl: response.data.imageurl
+        }
+        console.log(that.info)
+        if (that.info.photoUrlList.length > 0) {
+          that.bigUrl = this.info.photoUrlList[0]
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
     console.log(this.info)
+    var getPage = {
+      blogId: this.blogID,
+      pageNum: 1,
+      pageSize: 4
+    }
+    this.$axios
+      .post('http://localhost:8080/comment/getComment', getPage)
+      .then((response) => {
+        that.pageTotal = response.data.totalPage
+        var commentlist = response.data.content
+        that.comments = []
+        for (var i = 0; i < commentlist.length; i++) {
+          var temp = {
+            id: commentlist[i].id,
+            blogId: commentlist[i].blogId,
+            authorID: commentlist[i].authorID,
+            content: commentlist[i].content,
+            time: commentlist[i].time,
+            name: commentlist[i].name,
+            avatarUrl: commentlist[i].imageurl
+          }
+          that.comments.push(temp)
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
   },
   data () {
     return {
+      blogID: '',
       comment: '',
       commentInput: '',
       info: {},
       bigUrl: '',
-      comments: [
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          name: 'Test',
-          content: '这是一条评论',
-          time: '10月31日 21:36'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          name: 'Test',
-          content: '这是一条评论',
-          time: '10月31日 21:36'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          name: 'Test',
-          content: '这是一条评论',
-          time: '10月31日 21:36'
-        }
-      ],
+      comments: [],
       fit: 'fill',
-      hasshoucang: '0'
+      hasshoucang: '0',
+      pageTotal: 0,
+      currentPage: 1
     }
   },
   methods: {
@@ -188,8 +226,7 @@ export default {
         var datestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', myDate)
         var req = {
           blogId: this.info.id,
-          avatarUrl: this.info.avatarurl,
-          author: this.info.name,
+          authorID: this.$store.state.user.id,
           content: this.commentInput,
           time: datestr
         }
@@ -197,13 +234,79 @@ export default {
         this.$axios
           .post('http://localhost:8080/comment/addComment', req)
           .then((response) => {
-            console.log(response)
+            if (response.data.info === 'success') {
+              that.$options.methods.refreshBlog(this, 1)
+            } else {
+              this.$message.error('评论失败')
+            }
           })
           .catch(function (error) {
             console.log(error)
             that.$message.error('网络错误')
           })
       }
+    },
+    handlePageChange (val) {
+      this.$options.methods.refreshBlog(this, val)
+    },
+    refreshBlog (context, val) {
+      this.blogID = context.$cookies.get('blogID')
+      var that = context
+      that.$axios
+        .get('http://localhost:8080/blog/getSingleBlog', {params: {'blogID': this.blogID}})
+        .then((response) => {
+          console.log(response)
+          that.info = {
+            id: response.data.id,
+            content: response.data.content,
+            chatnum: response.data.commentNum,
+            trannum: response.data.tranNum,
+            zannum: response.data.zanNum,
+            authorID: response.data.authorID,
+            time: response.data.date,
+            photoUrlList: JSON.parse(response.data.imageList),
+            name: response.data.name,
+            avatarurl: response.data.imageurl
+          }
+          console.log(that.info)
+          if (that.info.photoUrlList.length > 0) {
+            that.bigUrl = context.info.photoUrlList[0]
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+      console.log(this.info)
+      var getPage = {
+        blogId: this.blogID,
+        pageNum: val,
+        pageSize: 4
+      }
+      context.currentPage = val
+      context.$axios
+        .post('http://localhost:8080/comment/getComment', getPage)
+        .then((response) => {
+          that.pageTotal = response.data.totalPage
+          var commentlist = response.data.content
+          that.comments = []
+          for (var i = 0; i < commentlist.length; i++) {
+            var temp = {
+              id: commentlist[i].id,
+              blogId: commentlist[i].blogId,
+              authorID: commentlist[i].authorID,
+              content: commentlist[i].content,
+              time: commentlist[i].time,
+              name: commentlist[i].name,
+              avatarUrl: commentlist[i].imageurl
+            }
+            that.comments.push(temp)
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
     }
   }
 }

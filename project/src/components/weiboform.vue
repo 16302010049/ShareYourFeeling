@@ -100,7 +100,7 @@ export default {
             this.$message.error('未登录')
           } else {
             var user = this.$store.state.user
-            formdata.append('author', user.name)
+            formdata.append('authorID', user.id)
             var myDate = new Date()
             var datestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', myDate)
             console.log(datestr)
@@ -112,8 +112,6 @@ export default {
             formdata.append('commentNum', 0)
             formdata.append('zanNum', 0)
             formdata.append('tranNum', 0)
-            formdata.append('avatarUrl', user.imageurl)
-            console.log(user.imageurl)
             var that = this
             this.$axios
               .post('http://localhost:8080/blog/postBlog', formdata)

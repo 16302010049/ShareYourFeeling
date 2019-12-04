@@ -111,13 +111,14 @@ export default {
           var temp = {
             id: response.data.content[i].id,
             photoUrlList: JSON.parse(response.data.content[i].imageList),
-            avatarurl: response.data.content[i].avatarUrl,
+            avatarurl: response.data.content[i].imageurl,
             chatnum: response.data.content[i].commentNum,
             trannum: response.data.content[i].tranNum,
             zannum: response.data.content[i].zanNum,
-            name: response.data.content[i].author,
+            name: response.data.content[i].name,
             content: response.data.content[i].content,
-            time: response.data.content[i].date
+            time: response.data.content[i].date,
+            authorID: response.data.content[i].authorID
           }
           console.log(temp)
           that.cardInput.push(temp)
@@ -166,13 +167,14 @@ export default {
             var temp = {
               id: response.data.content[i].id,
               photoUrlList: JSON.parse(response.data.content[i].imageList),
-              avatarurl: response.data.content[i].avatarUrl,
+              avatarurl: response.data.content[i].imageurl,
               chatnum: response.data.content[i].commentNum,
               trannum: response.data.content[i].tranNum,
               zannum: response.data.content[i].zanNum,
-              name: response.data.content[i].author,
+              name: response.data.content[i].name,
               content: response.data.content[i].content,
-              time: response.data.content[i].date
+              time: response.data.content[i].date,
+              authorID: response.data.content[i].authorID
             }
             console.log(temp)
             that.cardInput.push(temp)
@@ -201,13 +203,14 @@ export default {
             var temp = {
               id: response.data.content[i].id,
               photoUrlList: JSON.parse(response.data.content[i].imageList),
-              avatarurl: response.data.content[i].avatarUrl,
+              avatarurl: response.data.content[i].imageurl,
               chatnum: response.data.content[i].commentNum,
               trannum: response.data.content[i].tranNum,
               zannum: response.data.content[i].zanNum,
-              name: response.data.content[i].author,
+              name: response.data.content[i].name,
               content: response.data.content[i].content,
-              time: response.data.content[i].date
+              time: response.data.content[i].date,
+              authorID: response.data.content[i].authorID
             }
             console.log(temp)
             that.cardInput.push(temp)
