@@ -153,7 +153,7 @@ export default {
         .then((response) => {
           if (response.data.info === 'success') {
             that.$message.success('删除成功')
-              that.reload()
+            that.reload()
           } else {
             that.$message.error('删除失败')
           }
@@ -164,7 +164,8 @@ export default {
         })
     },
     jumpToSelf () {
-      this.$router.push({path: '/self', query: {isme: '0'}})
+      this.$cookies.set('selfID', this.input.authorID)
+      this.$router.push('/self')
     }
   }
 }

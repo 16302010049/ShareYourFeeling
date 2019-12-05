@@ -4,20 +4,17 @@
       <el-col :span="2">
       <el-upload
         class="upload-demo"
-        action="https://jsonplaceholder.typicode.com/posts/"
-        :on-preview="handlePreview"
-        :on-remove="handleRemove"
-        :before-remove="beforeRemove"
-        :limit="3"
-        :on-exceed="handleExceed"
+        action="String"
+        :http-request="updateBackground"
         :file-list="fileList"
+        :show-file-list="false"
         v-if="isMe">
         <el-button size="small" type="primary">修改背景图</el-button>
       </el-upload>
       </el-col>
     </el-row>
     <el-row>
-      <el-avatar :size="100" :src="input.avatarUrl" id="head"></el-avatar>
+      <el-avatar :size="100" :src="input.imageurl" id="head"/>
     </el-row>
     <el-row>
       <div id="name">{{input.name}}</div>
@@ -29,11 +26,40 @@
 <script>
 export default {
   name: 'selfcard',
-  data () {
-    return {
+  created () {
+    this.userID = this.$cookies.get('selfID')
+    if (this.userID == this.$store.state.user.id) {
+      this.isMe = true
+    } else {
+      this.isMe = false
     }
   },
-  props: ['input', 'isMe']
+  data () {
+    return {
+      isMe: true,
+      userID: 0
+    }
+  },
+  props: ['input'],
+  methods: {
+    updateBackground (file) {
+      let req = new FormData()
+      req.append('userID', this.userID)
+      req.append('file', file.file)
+      let that = this
+      this.$axios
+        .post('http://localhost:8080/user/modifyBackground', req)
+        .then((response) => {
+          let userNew = response.data
+          that.input.backgroundUrl = userNew.backgroundUrl
+          that.$cookies.set('user', userNew)
+          that.$store.commit('editUser', userNew)
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    }
+  }
 }
 </script>
 

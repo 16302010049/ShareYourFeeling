@@ -1,9 +1,13 @@
 <template>
   <div id="app">
     <el-container>
-      <el-header><webheader></webheader></el-header>
-      <router-view v-if="isRouterAlive" style="min-height: 700px"></router-view>
-      <el-footer><webfooter></webfooter></el-footer>
+      <el-header>
+        <webheader/></el-header>
+      <el-container style="min-height: 700px">
+        <router-view v-if="isRouterAlive"/>
+      </el-container>
+      <el-footer>
+        <webfooter/></el-footer>
     </el-container>
   </div>
 </template>

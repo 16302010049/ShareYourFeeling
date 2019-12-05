@@ -37,8 +37,6 @@
                   <div class="time">{{people.time}}</div>
                 </el-row>
                 <el-row>
-                  <el-badge :value="people.newNum" class="item">
-                  </el-badge>
                 </el-row>
               </el-col>
             </el-row>

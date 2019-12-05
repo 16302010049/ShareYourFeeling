@@ -62,9 +62,9 @@
           </el-col>
           </el-row>
           <div v-for="card in cardInput" :key="card">
-            <card-without-picture v-if="card.photoUrlList.length ===0" :input="card"></card-without-picture>
-            <cardwithonepicture v-if="card.photoUrlList.length ===1" :input="card"></cardwithonepicture>
-            <cardwithpictures v-if="card.photoUrlList.length>1" :input="card"></cardwithpictures>
+            <card-without-picture v-if="card.photoUrlList.length ===0" :input="card"/>
+            <cardwithonepicture v-if="card.photoUrlList.length ===1" :input="card"/>
+            <cardwithpictures v-if="card.photoUrlList.length>1" :input="card"/>
           </div>
           <el-pagination
             @current-change = "handlePageChange"

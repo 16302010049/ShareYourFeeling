@@ -32,7 +32,7 @@
             <el-button type="danger" icon="el-icon-circle-close" size="small" @click="unFollow">取关</el-button>
           </el-row>
           <el-row class="letter">
-          <el-button type="primary" icon="el-icon-message" size="small" :disabled="!hasguanzhu">私信</el-button>
+          <el-button type="primary" icon="el-icon-message" size="small" :disabled="!(hasguanzhu||isFans)">私信</el-button>
           </el-row>
         </el-col>
       </el-row>
@@ -61,10 +61,28 @@ export default {
         console.log(error)
         that.$message.error('网络错误')
       })
+    let req2 = {
+      followerID: this.input.id,
+      followID: this.$store.state.user.id
+    }
+    this.$axios
+      .post('http://localhost:8080/follow/checkFollow', req2)
+      .then((response) => {
+        if (response.data.info === 'Yes') {
+          that.isFans = true
+        } else {
+          that.isFans = false
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
   },
   data () {
     return {
-      hasguanzhu: false
+      hasguanzhu: false,
+      isFans: false
     }
   },
   props: ['input'],
@@ -84,7 +102,7 @@ export default {
           if (response.data.info === 'success') {
             that.$message.success('关注成功')
             that.hasguanzhu = true
-            that.input.guanNum++
+            that.input.fansNum++
           } else {
             that.$message.error('关注失败')
           }
@@ -106,7 +124,7 @@ export default {
           if (response.data.info === 'success') {
             that.$message.success('取关成功')
             that.hasguanzhu = false
-            that.input.guanNum--
+            that.input.fansNum--
           } else {
             that.$message.error('取关失败')
           }
@@ -117,7 +135,8 @@ export default {
         })
     },
     jumpToSelf () {
-      this.$router.push({path: '/self', query: {isme: '0'}})
+      this.$cookies.set('selfID', this.input.id)
+      this.$router.push('/self')
     },
     dateFtt (fmt, date) { // author: meizz
       var o = {

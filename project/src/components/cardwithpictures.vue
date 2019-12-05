@@ -159,7 +159,8 @@ export default {
         })
     },
     jumpToSelf () {
-      this.$router.push({path: '/self', query: {isme: '0'}})
+      this.$cookies.set('selfID', this.input.authorID)
+      this.$router.push('/self')
     }
   }
 }
