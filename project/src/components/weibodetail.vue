@@ -14,7 +14,7 @@
         <span style="color: white">space</span>
       </el-col>
       <el-col :span="2">
-        <el-button type="danger" icon="el-icon-delete" ></el-button>
+        <el-button type="danger" icon="el-icon-delete" v-if="isMe" @click="deleteBlog"></el-button>
       </el-col>
     </el-row>
     <el-row>
@@ -41,7 +41,7 @@
         </div>
       </div>
     </el-row>
-    <el-row id="infor" style="color: #409EFF;margin-top: 100px">
+    <el-row id="infor" style="color: #409EFF;margin-top: 150px">
       <el-col :span="6" v-if="!hasshoucang" class="shoucang" @click.native="mark()">
         <i class="el-icon-star-off"></i>
         <span>收藏</span>
@@ -51,7 +51,7 @@
         <span >取消收藏</span>
       </el-col>
       <el-col :span="6">
-        <i class="el-icon-thirdshare resize"></i>
+        <i class="el-icon-thirdshare resize" style="cursor: pointer" @click="tranBlog"></i>
         <span>{{info.trannum}}</span>
       </el-col>
       <el-col :span="6">
@@ -135,6 +135,7 @@ export default {
           name: response.data.name,
           avatarurl: response.data.imageurl
         }
+        this.isMe = this.$store.state.user.name === response.data.name
         console.log(that.info)
         if (that.info.photoUrlList.length > 0) {
           that.bigUrl = this.info.photoUrlList[0]
@@ -216,7 +217,8 @@ export default {
       pageTotal: 0,
       currentPage: 1,
       userID: 0,
-      isThumbsUp: false
+      isThumbsUp: false,
+      isMe: false
     }
   },
   methods: {
@@ -338,6 +340,47 @@ export default {
           that.$message.error('网络错误')
         })
     },
+    deleteBlog () {
+      let that = this
+      this.$axios
+        .get('http://localhost:8080/blog/deleteBlog', {params: {blogID: this.blogID}})
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('删除成功')
+            this.$router.go(-1)
+          } else {
+            that.$message.error('删除失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    tranBlog () {
+      let datep = new Date()
+      let datestrp = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', datep)
+      var that = this
+      let req = {
+        blogID: this.info.id,
+        userID: this.$store.state.user.id,
+        date: datestrp
+      }
+      this.$axios
+        .post('http://localhost:8080/blog/tranBlog', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('转发成功')
+            that.$options.methods.refreshBlog(this, 1)
+          } else {
+            that.$message.error('转发失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
     dateFtt (fmt, date) { // author: meizz
       var o = {
         'M+': date.getMonth() + 1, // 月份
@@ -375,6 +418,7 @@ export default {
           .post('http://localhost:8080/comment/addComment', req)
           .then((response) => {
             if (response.data.info === 'success') {
+              that.$message.success('评论成功')
               that.$options.methods.refreshBlog(this, 1)
             } else {
               that.$message.error('评论失败')

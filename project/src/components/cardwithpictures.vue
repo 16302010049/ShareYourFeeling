@@ -5,7 +5,7 @@
       <div id="content" style="cursor: pointer">{{input.content}}</div>
       </el-col>
       <el-col :span="4">
-        <el-button type="danger" icon="el-icon-delete" size="mini">删除</el-button>
+        <el-button type="danger" icon="el-icon-delete" size="mini"  @click.native="deleteBlog" v-if="isMe">删除</el-button>
         <el-button type="danger" icon="el-icon-star-on" size="mini" @click.native="unmark" v-if="hasshoucang">取消收藏</el-button>
         <el-button type="primary" icon="el-icon-star-off" size="mini" @click.native="mark" v-if="!hasshoucang">收藏微博</el-button>
       </el-col>
@@ -41,6 +41,7 @@
 export default {
   name: 'cardwithpictures',
   created () {
+    this.isMe = this.$store.state.user.name === this.input.name
     let req = {
       userID: this.$store.state.user.id,
       blogID: this.input.id
@@ -64,9 +65,11 @@ export default {
     return {
       circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
       fit: 'fill',
-      hasshoucang: true
+      hasshoucang: true,
+      isMe: false
     }
   },
+  inject: ['reload'],
   props: ['input'],
   methods: {
     jumptodetail () {
@@ -131,6 +134,23 @@ export default {
             that.$message.success('取消收藏成功')
           } else {
             that.$message.error('取消收藏失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    deleteBlog () {
+      let that = this
+      this.$axios
+        .get('http://localhost:8080/blog/deleteBlog', {params: {blogID: this.input.id}})
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('删除成功')
+            that.reload()
+          } else {
+            that.$message.error('删除失败')
           }
         })
         .catch(function (error) {

@@ -46,6 +46,8 @@ export default {
     var validateDesc = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入微博内容'))
+      } else if (value.indexOf('转发') === 0) {
+        callback(new Error('请勿以转发开头'))
       } else {
         callback()
       }

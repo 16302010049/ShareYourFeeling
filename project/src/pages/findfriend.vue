@@ -16,9 +16,9 @@
           </el-row>
           <peoplecard v-for="cardInput in cardInputs" :key="cardInput" :input="cardInput"></peoplecard>
           <el-pagination
+            @current-change = "handlePageChange"
             background
             layout="prev, pager, next"
-            @current-change="handlePageChange"
             :page-count="pageSize" id="pages">
           </el-pagination>
         </el-main>
@@ -52,17 +52,6 @@ export default {
   },
   data () {
     return {
-      cardInputr: {
-        avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        name: 'Test2',
-        gNum: 102,
-        fansNum: 102,
-        weiboNum: 102,
-        signature: '这是他的签名',
-        type: 'nearby',
-        tags: [],
-        hasgz: false
-      },
       cardInputs: [],
       tags: [],
       closeable: true,
@@ -72,17 +61,35 @@ export default {
   methods: {
     updateTags (data) {
       this.tags = data
+      let req = {
+        userID: this.$store.state.user.id,
+        pageNum: 1,
+        pageSize: 4,
+        tags: JSON.stringify(this.tags)
+      }
+      this.cardInputs = []
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/user/getPageUserTags', req)
+        .then((response) => {
+          that.pageSize = response.data.totalPage
+          that.cardInputs = response.data.content
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
     },
     handlePageChange (val) {
       let req = {
         userID: this.$store.state.user.id,
         pageNum: val,
-        pageSize: 4
+        pageSize: 4,
+        tags: JSON.stringify(this.tags)
       }
       this.cardInputs = []
       var that = this
       this.$axios
-        .post('http://localhost:8080/user/getPageUser', req)
+        .post('http://localhost:8080/user/getPageUserTags', req)
         .then((response) => {
           that.pageSize = response.data.totalPage
           that.cardInputs = response.data.content

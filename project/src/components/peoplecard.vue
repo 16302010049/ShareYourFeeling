@@ -24,45 +24,17 @@
             space
           </div>
         </el-col>
-        <div v-if="input.type==='guanzhu'">
         <el-col :span="4">
           <el-row v-if="!hasguanzhu">
-            <el-button type="primary" icon="el-icon-circle-plus-outline" size="small" @click="guanzhu">关注</el-button>
+            <el-button type="primary" icon="el-icon-circle-plus-outline" size="small" @click="follow">关注</el-button>
           </el-row>
           <el-row v-if="hasguanzhu">
-            <el-button type="danger" icon="el-icon-circle-close" size="small" @click="quguan">取关</el-button>
+            <el-button type="danger" icon="el-icon-circle-close" size="small" @click="unFollow">取关</el-button>
           </el-row>
           <el-row class="letter">
           <el-button type="primary" icon="el-icon-message" size="small" :disabled="!hasguanzhu">私信</el-button>
           </el-row>
         </el-col>
-        </div>
-        <div v-if="input.type==='nearby'">
-          <el-col :span="4">
-            <el-row v-if="!hasguanzhu">
-              <el-button type="primary" icon="el-icon-circle-plus-outline" size="small" @click="guanzhu">关注</el-button>
-            </el-row>
-            <el-row v-if="hasguanzhu">
-              <el-button type="danger" icon="el-icon-circle-close" size="small" @click="quguan">取关</el-button>
-            </el-row>
-            <el-row class="letter">
-              <el-button type="primary" icon="el-icon-message" size="small" :disabled="!hasguanzhu">私信</el-button>
-            </el-row>
-          </el-col>
-        </div>
-        <div v-if="input.type==='fans'">
-          <el-col :span="4">
-            <el-row v-if="!hasguanzhu">
-              <el-button type="primary" icon="el-icon-circle-plus-outline" size="small" @click="guanzhu">关注</el-button>
-            </el-row>
-            <el-row v-if="hasguanzhu">
-              <el-button type="danger" icon="el-icon-circle-close" size="small" @click="quguan">取关</el-button>
-            </el-row>
-            <el-row class="letter">
-              <el-button type="primary" icon="el-icon-message" size="small" >私信</el-button>
-            </el-row>
-          </el-col>
-        </div>
       </el-row>
     </el-card>
 </template>
@@ -70,21 +42,102 @@
 <script>
 export default {
   name: 'peoplecard',
+  created () {
+    let that = this
+    let req = {
+      followerID: this.$store.state.user.id,
+      followID: this.input.id
+    }
+    this.$axios
+      .post('http://localhost:8080/follow/checkFollow', req)
+      .then((response) => {
+        if (response.data.info === 'Yes') {
+          that.hasguanzhu = true
+        } else {
+          that.hasguanzhu = false
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
+  },
   data () {
     return {
-      hasguanzhu: this.input.hasgz
+      hasguanzhu: false
     }
   },
   props: ['input'],
   methods: {
-    guanzhu () {
-      this.hasguanzhu = true
+    follow () {
+      let that = this
+      let myDate = new Date()
+      let datestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', myDate)
+      let req = {
+        followerID: this.$store.state.user.id,
+        followID: this.input.id,
+        time: datestr
+      }
+      this.$axios
+        .post('http://localhost:8080/follow/addFollow', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('关注成功')
+            that.hasguanzhu = true
+            that.input.guanNum++
+          } else {
+            that.$message.error('关注失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
     },
-    quguan () {
-      this.hasguanzhu = false
+    unFollow () {
+      let that = this
+      let req = {
+        followerID: this.$store.state.user.id,
+        followID: this.input.id
+      }
+      this.$axios
+        .post('http://localhost:8080/follow/deleteFollow', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('取关成功')
+            that.hasguanzhu = false
+            that.input.guanNum--
+          } else {
+            that.$message.error('取关失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
     },
     jumpToSelf () {
       this.$router.push({path: '/self', query: {isme: '0'}})
+    },
+    dateFtt (fmt, date) { // author: meizz
+      var o = {
+        'M+': date.getMonth() + 1, // 月份
+        'd+': date.getDate(), // 日
+        'h+': date.getHours(), // 小时
+        'm+': date.getMinutes(), // 分
+        's+': date.getSeconds(), // 秒
+        'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
+        'S': date.getMilliseconds() // 毫秒
+      }
+      if (/(y+)/.test(fmt)) {
+        fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+      }
+      for (var k in o) {
+        if (new RegExp('(' + k + ')').test(fmt)) {
+          fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)))
+        }
+      }
+      return fmt
     }
   }
 }
