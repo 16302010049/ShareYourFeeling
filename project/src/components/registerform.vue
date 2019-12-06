@@ -3,7 +3,7 @@
      <el-form-item label="头像" prop="imageUrl" required>
        <el-upload
          class="avatar-uploader"
-         action="http://localhost:80"
+         action="string"
          :show-file-list="false"
          :on-change="beforeAvatarSet"
          :auto-upload="false"

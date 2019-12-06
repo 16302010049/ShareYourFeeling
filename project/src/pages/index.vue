@@ -58,7 +58,7 @@
               <span style="color: white">Space</span>
             </el-col>
           <el-col :span="10" >
-          <el-input v-model="input" placeholder="搜索感兴趣的内容或人" prefix-icon="el-icon-search" @input="handleInputChange"></el-input>
+            <el-input v-model="input" placeholder="搜索感兴趣的内容或人" prefix-icon="el-icon-search" @input="handleInputChange"/>
           </el-col>
           </el-row>
           <div v-for="card in cardInput" :key="card">
@@ -75,7 +75,7 @@
             >
           </el-pagination>
         </el-main>
-        <el-aside width="300px"></el-aside>
+        <el-aside width="300px"/>
       </el-container>
       </el-main>
 </template>

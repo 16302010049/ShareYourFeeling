@@ -250,7 +250,7 @@ export default {
     margin-bottom: 0;
   }
   #chatBox{
-    background: #e7e7e7;
+    background: rgba(236, 235, 238, 0.77);
   }
   #chatBoxname{
     text-align: left;
