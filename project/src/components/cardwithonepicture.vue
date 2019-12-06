@@ -165,7 +165,7 @@ export default {
     },
     jumpToSelf () {
       this.$cookies.set('selfID', this.input.authorID)
-      this.$router.push('/self')
+      this.$router.push('/self-' + new Date().toTimeString())
     }
   }
 }

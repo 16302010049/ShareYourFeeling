@@ -107,7 +107,7 @@ export default {
     },
     goToSelf () {
       this.$cookies.set('selfID', this.user.id)
-      this.$router.push('/self')
+      this.$router.push('/self-' + new Date().toTimeString())
     },
     goToMessage () {
       this.$router.push('/message')

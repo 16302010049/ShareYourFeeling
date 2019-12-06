@@ -16,6 +16,7 @@
           </el-row>
           <peoplecard v-for="cardInput in cardInputs" :key="cardInput" :input="cardInput"></peoplecard>
           <el-pagination
+            :current-page.sync="currentPage"
             @current-change = "handlePageChange"
             background
             layout="prev, pager, next"
@@ -55,7 +56,8 @@ export default {
       cardInputs: [],
       tags: [],
       closeable: true,
-      pageSize: 0
+      pageSize: 0,
+      currentPage: 1
     }
   },
   methods: {
@@ -73,6 +75,7 @@ export default {
         .post('http://localhost:8080/user/getPageUserTags', req)
         .then((response) => {
           that.pageSize = response.data.totalPage
+          that.currentPage = 1
           that.cardInputs = response.data.content
         })
         .catch(function (error) {

@@ -3,10 +3,10 @@
     <el-aside width="400px" >
       <el-row id="user">
         <el-col :span="4" id="userava">
-          <el-avatar :size="50" :src="circleUrl" @click.native="jumpToSelf" style="cursor: pointer"></el-avatar>
+          <el-avatar :size="50" :src="user.imageurl" @click.native="jumpToSelf" style="cursor: pointer"></el-avatar>
         </el-col>
         <el-col :span="4" id="username">
-          <div>Test</div>
+          <div>{{user.name}}</div>
         </el-col>
       </el-row>
       <el-row id="search">
@@ -22,21 +22,11 @@
           <el-row>
             <el-row class="people" >
               <el-col :span="4" class="avatar">
-                <el-avatar :size="50" :src="people.avatarUrl" @click.native="jumpToOther"></el-avatar>
+                <el-avatar :size="50" :src="people.imageurl" @click.native="jumpToOther"></el-avatar>
               </el-col>
               <el-col :span="17">
                 <el-row class="name">
                   <div class="infor">{{people.name}}</div>
-                </el-row>
-                <el-row>
-                  <div class="infor">{{people.newMessage}}</div>
-                </el-row>
-              </el-col>
-              <el-col :span="3">
-                <el-row>
-                  <div class="time">{{people.time}}</div>
-                </el-row>
-                <el-row>
                 </el-row>
               </el-col>
             </el-row>
@@ -73,35 +63,7 @@ export default {
       circleUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
       input: '',
       textarea: '',
-      peopleList: [{
-        avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        name: 'Test',
-        newMessage: '这是最新的一条消息',
-        time: '10-21',
-        newNum: 8
-      },
-      {
-        avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        name: 'Test',
-        newMessage: '这是最新的一条消息',
-        time: '10-21',
-        newNum: 12
-      },
-      {
-        avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        name: 'Test',
-        newMessage: '这是最新的一条消息',
-        time: '10-21',
-        newNum: 10
-      },
-      {
-        avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        name: 'Test',
-        newMessage: '这是最新的一条消息',
-        time: '10-21',
-        newNum: 9
-      }
-      ],
+      peopleList: [],
       chatList: [
         {
           avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
@@ -112,75 +74,35 @@ export default {
           avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
           type: 'right',
           content: '这是右边的第一条消息用来测试换行及显示效果等'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这是右边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这是右边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这是右边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这是右边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这是右边的第一条消息'
         }
       ],
       parnerName: 'Test',
-      chooseIndex: -1
+      chooseIndex: -1,
+      user: {}
     }
+  },
+  created () {
+    this.user = this.$store.state.user
+    let req = {
+      userID: this.user.id,
+      str: ''
+    }
+    this.peopleList = []
+    var that = this
+    this.$axios
+      .post('http://localhost:8080/user/getChatList', req)
+      .then((response) => {
+        that.peopleList = response.data
+      })
+      .catch(function (error) {
+        console.log(error)
+        this.$message.error('网络错误')
+      })
   },
   methods: {
     chooseMe (index) {
       this.chooseIndex = index
+      this.parnerName = this.peopleList[index].name
     },
     jumpToOther () {
       this.$router.push({path: '/self', query: {isme: '0'}})
@@ -220,7 +142,8 @@ export default {
   }
 
   .name {
-    margin-top: 10px;
+    margin-top: 18px;
+    font-size: 25px;
   }
 
   #input {

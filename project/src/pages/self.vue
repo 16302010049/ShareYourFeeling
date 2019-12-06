@@ -6,12 +6,15 @@
         <selfcard :input="selfCardInput"/>
         <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" @select="handleSelect">
           <el-menu-item index="1" v-if="isMe">我的动态({{user.blogNum}})</el-menu-item>
-          <el-menu-item index="1" v-if="!isMe">他的动态</el-menu-item>
+          <el-menu-item index="1" v-if="!isMe&&user.sex === 'male'">他的动态({{user.blogNum}})</el-menu-item>
+          <el-menu-item index="1" v-if="!isMe&&user.sex === 'female'">她的动态({{user.blogNum}})</el-menu-item>
           <el-menu-item index="2" v-if="isMe">我的资料</el-menu-item>
           <el-menu-item index="3" v-if="isMe">我的关注({{user.guanNum}})</el-menu-item>
-          <el-menu-item index="3" v-if="!isMe">他的关注</el-menu-item>
-          <el-menu-item index="4" v-if="isMe">我的粉丝</el-menu-item>
-          <el-menu-item index="4" v-if="!isMe">他的粉丝</el-menu-item>
+          <el-menu-item index="3" v-if="!isMe&&user.sex === 'male'">他的关注({{user.guanNum}})</el-menu-item>
+          <el-menu-item index="3" v-if="!isMe&&user.sex === 'female'">她的关注({{user.guanNum}})</el-menu-item>
+          <el-menu-item index="4" v-if="isMe">我的粉丝({{user.fansNum}})</el-menu-item>
+          <el-menu-item index="4" v-if="!isMe&&user.sex === 'male'">他的粉丝{{user.fansNum}}</el-menu-item>
+          <el-menu-item index="4" v-if="!isMe&&user.sex === 'female'">她的粉丝{{user.fansNum}}</el-menu-item>
         </el-menu>
         <div v-if="currentIndex==='1'">
           <el-row class="search">
@@ -56,15 +59,17 @@
               <span style="color: white">Space</span>
             </el-col>
             <el-col :span="10" >
-              <el-input v-model="input" placeholder="搜索粉丝" prefix-icon="el-icon-search"/>
+              <el-input v-model="fansInput" placeholder="搜索粉丝" prefix-icon="el-icon-search"  @input="handleFansSearch"/>
             </el-col>
           </el-row>
-          <peoplecard v-for="cardInput in followCardInputs" :key="cardInput" :input="cardInput"></peoplecard>
+          <peoplecard v-for="cardInput in followCardInputs" :key="cardInput" :input="cardInput" ></peoplecard>
         </div>
         <el-pagination
+          ref="pages"
           @current-change = "handlePageChange"
           background
           layout="prev, pager, next"
+          :current-page.sync="currentPage"
           :page-count="pageSize" id="pages" v-if="currentIndex!=='2'">
         </el-pagination>
       </el-main>
@@ -91,6 +96,12 @@ export default {
     Selfcard
   },
   inject: ['reload'],
+  watch: {
+    '$route': function (to, from) {
+      // 拿到目标参数 to.query.id 去再次请求数据接口
+      this.reload()
+    }
+  },
   data () {
     return {
       user: {},
@@ -104,7 +115,9 @@ export default {
       followCardInputs: [],
       isMe: true,
       pageSize: 0,
-      followInput: ''
+      followInput: '',
+      fansInput: '',
+      currentPage: 1
     }
   },
   methods: {
@@ -114,6 +127,8 @@ export default {
         this.$options.methods.searchBlog(this, 1, '')
       } else if (key === '3') {
         this.$options.methods.searchFollow(this, 1, '')
+      } else if (key === '4') {
+        this.$options.methods.searchFans(this, 1, '')
       }
     },
     handlePageChange (val) {
@@ -121,13 +136,21 @@ export default {
         this.$options.methods.searchBlog(this, val, this.inputBlog)
       } else if (this.currentIndex === '3') {
         this.$options.methods.searchFollow(this, val, this.followInput)
+      } else if (this.currentIndex === '4') {
+        this.$options.methods.searchFans(this, val, this.fansInput)
       }
     },
     handleBlogSearch (val) {
       this.$options.methods.searchBlog(this, 1, val)
+      this.currentPage = 1
     },
     handleFollowSearch (val) {
       this.$options.methods.searchFollow(this, 1, val)
+      this.currentPage = 1
+    },
+    handleFansSearch (val) {
+      this.$options.methods.searchFans(this, 1, val)
+      this.currentPage = 1
     },
     searchFollow (context, pageNum, str) {
       let req = {
@@ -140,6 +163,25 @@ export default {
       var that = context
       context.$axios
         .post('http://localhost:8080/user/getFollow', req)
+        .then((response) => {
+          that.pageSize = response.data.totalPage
+          that.followCardInputs = response.data.content
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+    },
+    searchFans (context, pageNum, str) {
+      let req = {
+        userID: context.userID,
+        pageNum: pageNum,
+        pageSize: 4,
+        str: str
+      }
+      this.followCardInputs = []
+      var that = context
+      context.$axios
+        .post('http://localhost:8080/user/getFans', req)
         .then((response) => {
           that.pageSize = response.data.totalPage
           that.followCardInputs = response.data.content
@@ -185,13 +227,9 @@ export default {
         })
     }
   },
-  watch: {
-    '$route': function (to, from) {
-      this.reload()
-    }
-  },
   created () {
     this.userID = this.$cookies.get('selfID')
+    this.isMe = this.userID == this.$store.state.user.id
     let that = this
     this.$axios
       .get('http://localhost:8080/user/getOther', {params: {userID: this.userID}})

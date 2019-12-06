@@ -41,7 +41,7 @@ export default new Router({
       component: post
     },
     {
-      path: '/self',
+      path: '/self-*',
       name: 'self',
       component: self
     },

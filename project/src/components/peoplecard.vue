@@ -136,7 +136,7 @@ export default {
     },
     jumpToSelf () {
       this.$cookies.set('selfID', this.input.id)
-      this.$router.push('/self')
+      this.$router.push('/self-' + new Date().toTimeString())
     },
     dateFtt (fmt, date) { // author: meizz
       var o = {

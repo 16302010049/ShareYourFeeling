@@ -69,7 +69,7 @@
           <el-pagination
             @current-change = "handlePageChange"
               background
-            :current-page="currentPage"
+            :current-page.sync="currentPage"
             layout="prev, pager, next"
             :page-count="pageSize" id="pages"
             >
@@ -148,6 +148,7 @@ export default {
         this.currentPage = 1
         this.$options.methods.searchBlogByStr(this, val, 1)
       } else {
+        this.currentPage = 1
         this.$options.methods.getAllRequest(1, this)
       }
     },

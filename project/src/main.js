@@ -10,6 +10,15 @@ import store from './stagestore'
 import axios from 'axios'
 import qs from 'qs.js'
 import './assets/icon/iconfont.css'
+import AMap from 'vue-amap'
+Vue.use(AMap)
+
+AMap.initAMapApiLoader({
+  // 高德key
+  key: '59f40ac34dca1b03b51a638a20ffcca4',
+  // 插件集合 （插件按需引入）
+  plugin: ['AMap.Geolocation']
+})
 
 Vue.prototype.$axios = axios
 Vue.prototype.qs = qs

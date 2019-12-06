@@ -9,19 +9,21 @@
                 <span style="color: white">Space</span>
               </el-col>
               <el-col :span="10" >
-                <el-input v-model="input" placeholder="搜索收藏的内容" ></el-input>
-              </el-col>
-              <el-col :span="2">
-                <el-button type="primary" icon="el-icon-search">搜索</el-button>
+                <el-input v-model="input" placeholder="搜索收藏的内容" @input="search" prefix-icon="el-icon-search"></el-input>
               </el-col>
             </el-row>
-            <card-without-picture   :input="cardInputType1" ></card-without-picture>
-            <cardwithonepicture :input="cardInputType2"></cardwithonepicture>
-            <cardwithpictures :input="cardInputType3"></cardwithpictures>
+            <div v-for="card in cardInput" :key="card">
+              <card-without-picture v-if="card.photoUrlList.length ===0" :input="card"/>
+              <cardwithonepicture v-if="card.photoUrlList.length ===1" :input="card"/>
+              <cardwithpictures v-if="card.photoUrlList.length>1" :input="card"/>
+            </div>
             <el-pagination
+              @current-change = "handlePageChange"
               background
+              :current-page.sync="currentPage"
+              :page-count="pageSize"
               layout="prev, pager, next"
-              :total="1000" id="pages">
+             id="pages">
             </el-pagination>
           </el-main>
           <el-aside width="300px"></el-aside>
@@ -36,37 +38,93 @@ import Cardwithonepicture from '../components/cardwithonepicture'
 export default {
   name: 'collect',
   components: {Cardwithonepicture, CardWithoutPicture, Cardwithpictures},
+  created () {
+    let req = {
+      userID: this.$store.state.user.id,
+      pageNum: 1,
+      pageSize: 4,
+      str: ''
+    }
+    var that = this
+    this.$axios
+      .post('http://localhost:8080/user/getCollect', req)
+      .then((response) => {
+        that.cardInput = []
+        that.pageSize = response.data.totalPage
+        for (var i = 0; i < response.data.content.length; i++) {
+          console.log(response.data.content[i].avatarUrl)
+          var temp = {
+            id: response.data.content[i].id,
+            photoUrlList: JSON.parse(response.data.content[i].imageList),
+            avatarurl: response.data.content[i].imageurl,
+            chatnum: response.data.content[i].commentNum,
+            trannum: response.data.content[i].tranNum,
+            zannum: response.data.content[i].zanNum,
+            name: response.data.content[i].name,
+            content: response.data.content[i].content,
+            time: response.data.content[i].date,
+            authorID: response.data.content[i].authorID
+          }
+          console.log(temp)
+          that.cardInput.push(temp)
+        }
+      })
+      .catch(function (error) {
+        console.log(error)
+        that.$message.error('网络错误')
+      })
+  },
   data () {
     return {
-      cardInputType1: {
-        url: '',
-        avatarurl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        content: '这是不带图片的微博',
-        name: 'Test',
-        time: '10月31日 21:59',
-        trannum: 114514,
-        chatnum: 114514,
-        zannum: 114514
-      },
-      cardInputType2: {
-        avatarurl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        content: '这是一个带一个图片的微博',
-        name: 'Test',
-        time: '10月31日 21:59',
-        trannum: 114514,
-        chatnum: 114514,
-        zannum: 114514
-      },
-      cardInputType3: {
-        photoUrlList: ['', '', '', '', '', '', ''],
-        avatarurl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-        content: '这是一个带多个图片的微博',
-        name: 'Test',
-        time: '10月31日 21:59',
-        trannum: 114514,
-        chatnum: 114514,
-        zannum: 114514
+      cardInput: [],
+      pageSize: 1,
+      currentPage: 1,
+      input: ''
+    }
+  },
+  methods: {
+    handlePageChange (val) {
+      this.$options.methods.searchCollect(this, val, this.input)
+    },
+    search () {
+      this.currentPage = 1
+      this.$options.methods.searchCollect(this, 1, this.input)
+    },
+    searchCollect (context, pageNum, str) {
+      let req = {
+        userID: context.$store.state.user.id,
+        pageNum: pageNum,
+        pageSize: 4,
+        str: str
       }
+      var that = context
+      context.$axios
+        .post('http://localhost:8080/user/getCollect', req)
+        .then((response) => {
+          that.cardInput = []
+          that.pageSize = response.data.totalPage
+          for (var i = 0; i < response.data.content.length; i++) {
+            console.log(response.data.content[i].avatarUrl)
+            var temp = {
+              id: response.data.content[i].id,
+              photoUrlList: JSON.parse(response.data.content[i].imageList),
+              avatarurl: response.data.content[i].imageurl,
+              chatnum: response.data.content[i].commentNum,
+              trannum: response.data.content[i].tranNum,
+              zannum: response.data.content[i].zanNum,
+              name: response.data.content[i].name,
+              content: response.data.content[i].content,
+              time: response.data.content[i].date,
+              authorID: response.data.content[i].authorID
+            }
+            console.log(temp)
+            that.cardInput.push(temp)
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
     }
   }
 }
