@@ -32,7 +32,7 @@
             <el-button type="danger" icon="el-icon-circle-close" size="small" @click="unFollow">取关</el-button>
           </el-row>
           <el-row class="letter">
-          <el-button type="primary" icon="el-icon-message" size="small" :disabled="!(hasguanzhu||isFans)">私信</el-button>
+          <el-button type="primary" icon="el-icon-message" size="small" :disabled="!(hasguanzhu||isFans)" @click="goToMessage">私信</el-button>
           </el-row>
         </el-col>
       </el-row>
@@ -157,6 +157,9 @@ export default {
         }
       }
       return fmt
+    },
+    goToMessage () {
+      this.$router.push('/message')
     }
   }
 }

@@ -8,24 +8,18 @@ import router from './router'
 import VueCookies from 'vue-cookies'
 import store from './stagestore'
 import axios from 'axios'
-import qs from 'qs.js'
 import './assets/icon/iconfont.css'
-import AMap from 'vue-amap'
-Vue.use(AMap)
+import BaiduMap from 'vue-baidu-map'
 
-AMap.initAMapApiLoader({
-  // 高德key
-  key: '59f40ac34dca1b03b51a638a20ffcca4',
-  // 插件集合 （插件按需引入）
-  plugin: ['AMap.Geolocation']
+Vue.use(BaiduMap, {
+  // ak 是在百度地图开发者平台申请的密钥 详见 http://lbsyun.baidu.com/apiconsole/key */
+  ak: '2QUXnAEENcLEiFoIguhN7GxQmus0XR6u'
 })
 
 Vue.prototype.$axios = axios
-Vue.prototype.qs = qs
 
 Vue.use(ElementUI)
 Vue.use(VueCookies)
-Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 new Vue({

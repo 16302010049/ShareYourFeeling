@@ -12,7 +12,8 @@
       <el-row id="search">
         <el-input
           placeholder="搜索联系人"
-          v-model="input" id="input">
+          v-model="input" id="input"
+         @input="handleInput">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
         </el-input>
       </el-row>
@@ -22,7 +23,7 @@
           <el-row>
             <el-row class="people" >
               <el-col :span="4" class="avatar">
-                <el-avatar :size="50" :src="people.imageurl" @click.native="jumpToOther"></el-avatar>
+                <el-avatar :size="50" :src="people.imageurl" @click.native="jumpToOther(index)"></el-avatar>
               </el-col>
               <el-col :span="17">
                 <el-row class="name">
@@ -38,7 +39,12 @@
     </el-aside>
     <el-main id="chatBox">
      <el-row>
+       <el-col :span="8">
        <div id="chatBoxname">{{parnerName}}</div>
+       </el-col>
+       <el-col :span="4">
+       <el-button type="primary" icon="el-icon-refresh"  @click="refresh" v-if="chooseIndex>=0">刷新</el-button>
+       </el-col>
      </el-row>
       <div id="messagebox">
         <qipao v-for="chat in chatList" :key="chat" :input="chat"></qipao>
@@ -47,7 +53,9 @@
         type="textarea"
         :rows="2"
         placeholder="请输入内容按下Enter发送"
-        v-model="textarea" resize="none">
+        v-model="textarea" resize="none"
+       @keyup.enter.native="inputChat"
+        v-if="chooseIndex>=0">
       </el-input>
     </el-main>
   </el-container>
@@ -64,19 +72,8 @@ export default {
       input: '',
       textarea: '',
       peopleList: [],
-      chatList: [
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'left',
-          content: '这是左边的第一条消息用来测试换行以及显示效果等'
-        },
-        {
-          avatarUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
-          type: 'right',
-          content: '这是右边的第一条消息用来测试换行及显示效果等'
-        }
-      ],
-      parnerName: 'Test',
+      chatList: [],
+      parnerName: '未选择联系人',
       chooseIndex: -1,
       user: {}
     }
@@ -102,13 +99,142 @@ export default {
   methods: {
     chooseMe (index) {
       this.chooseIndex = index
+      this.textarea = ''
       this.parnerName = this.peopleList[index].name
+      let req = {
+        userIDSmall: Math.min(this.user.id, this.peopleList[index].id),
+        userIDBig: Math.max(this.user.id, this.peopleList[index].id)
+      }
+      var that = this
+      this.chatList = []
+      this.$axios
+        .post('http://localhost:8080/user/getChat', req)
+        .then((response) => {
+          console.log(response)
+          let message = JSON.parse(response.data.content)
+          console.log(message)
+          for (let i = 0; i < message.length; i++) {
+            if (message[i].userID === that.user.id) {
+              let temp = {
+                avatarUrl: that.user.imageurl,
+                type: 'right',
+                content: message[i].content
+              }
+              that.chatList.push(temp)
+            } else {
+              let temp = {
+                avatarUrl: that.peopleList[index].imageurl,
+                type: 'left',
+                content: message[i].content
+              }
+              that.chatList.push(temp)
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          this.$message.error('网络错误')
+        })
     },
-    jumpToOther () {
-      this.$router.push({path: '/self', query: {isme: '0'}})
+    handleInput (val) {
+      this.chooseIndex = -1
+      this.chatList = []
+      this.parnerName = '未选择联系人'
+      let req = {
+        userID: this.user.id,
+        str: val
+      }
+      this.peopleList = []
+      var that = this
+      this.$axios
+        .post('http://localhost:8080/user/getChatList', req)
+        .then((response) => {
+          that.peopleList = response.data
+        })
+        .catch(function (error) {
+          console.log(error)
+          this.$message.error('网络错误')
+        })
+    },
+    refresh () {
+      this.parnerName = this.peopleList[this.chooseIndex].name
+      let req = {
+        userIDSmall: Math.min(this.user.id, this.peopleList[this.chooseIndex].id),
+        userIDBig: Math.max(this.user.id, this.peopleList[this.chooseIndex].id)
+      }
+      var that = this
+      this.chatList = []
+      this.$axios
+        .post('http://localhost:8080/user/getChat', req)
+        .then((response) => {
+          console.log(response)
+          let message = JSON.parse(response.data.content)
+          console.log(message)
+          for (let i = 0; i < message.length; i++) {
+            if (message[i].userID === that.user.id) {
+              let temp = {
+                avatarUrl: that.user.imageurl,
+                type: 'right',
+                content: message[i].content
+              }
+              that.chatList.push(temp)
+            } else {
+              let temp = {
+                avatarUrl: that.peopleList[this.chooseIndex].imageurl,
+                type: 'left',
+                content: message[i].content
+              }
+              that.chatList.push(temp)
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          this.$message.error('网络错误')
+        })
+    },
+    inputChat () {
+      var inp = this.textarea.replace(/[\r\n]/g, '')
+      if (inp !== '') {
+        let chat = {
+          userID: this.user.id,
+          content: inp
+        }
+        let req = {
+          userIDSmall: Math.min(this.user.id, this.peopleList[this.chooseIndex].id),
+          userIDBig: Math.max(this.user.id, this.peopleList[this.chooseIndex].id),
+          content: JSON.stringify(chat)
+        }
+        var that = this
+        this.$axios
+          .post('http://localhost:8080/user/addChat', req)
+          .then((response) => {
+            if (response.data.info === 'success') {
+              let temp = {
+                avatarUrl: that.user.imageurl,
+                type: 'right',
+                content: inp
+              }
+              that.chatList.push(temp)
+            } else {
+              this.$message.error('网络错误')
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+            this.$message.error('网络错误')
+          })
+      } else {
+        this.$message.error('请输入内容')
+      }
+    },
+    jumpToOther (index) {
+      this.$cookies.set('selfID', this.peopleList[index].id)
+      this.$router.push('/self-' + new Date().toTimeString())
     },
     jumpToSelf () {
-      this.$router.push({path: '/self', query: {isme: '1'}})
+      this.$cookies.set('selfID', this.user.id)
+      this.$router.push('/self-' + new Date().toTimeString())
     }
   }
 }
@@ -177,7 +303,7 @@ export default {
   }
   #chatBoxname{
     text-align: left;
-    font-size: 32px;
+    font-size: 25px;
     color: #a9a9a9;
     margin-bottom: 30px;
   }

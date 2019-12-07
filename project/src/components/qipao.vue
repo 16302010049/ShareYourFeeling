@@ -2,7 +2,7 @@
   <div>
     <el-row v-if="input.type==='right'">
       <el-col :span="12">
-        <div style="color:  #e7e7e7">space</div>
+        <div style="color:   rgba(236, 235, 238, 0.77)">space</div>
       </el-col>
       <el-col :span="10">
         <div class="right">
