@@ -10,7 +10,7 @@
       <el-col :span="21">
         <el-row>
           <el-col :span="19"  @click.native = jumptodetail style="cursor: pointer">
-          <div id="content" >{{input.content}}</div>
+          <div id="content" style="cursor: pointer;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{{input.content}}</div>
           </el-col>
           <el-col :span="5">
             <el-button type="danger" icon="el-icon-delete" size="mini"  @click.native="deleteBlog" v-if="isMe">删除</el-button>
@@ -26,7 +26,7 @@
               <span>{{input.time}}</span>
             </div>
           </el-col>
-          <el-col :span="8" style="color: white;cursor: pointer" @click.native="jumptodetail">just for space</el-col>
+          <el-col :span="10" style="color: white;cursor: pointer" @click.native="jumptodetail">just for space</el-col>
           <el-col :span="7">
             <div id="icons"  @click = jumptodetail style="cursor: pointer">
               <i class="el-icon-thirdshare resize"></i>

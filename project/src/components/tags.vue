@@ -27,13 +27,18 @@ export default {
   name: 'tags',
   data () {
     return {
-      dynamicTags: this.input,
+      dynamicTags: this.$props.input,
       inputVisible: false,
       inputValue: ''
     }
   },
   props: ['input', 'closeable'],
-  methods: {
+  watch: {
+    input (newValue, oldValue) {
+      this.dynamicTags = newValue
+    }
+  },
+    methods: {
     handleClose (tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
       this.$emit('update', this.dynamicTags)
@@ -45,7 +50,6 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus()
       })
     },
-
     handleInputConfirm () {
       let inputValue = this.inputValue
       if (inputValue) {

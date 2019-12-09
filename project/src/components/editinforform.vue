@@ -1,6 +1,6 @@
 <template>
     <div>
-    <el-form ref="form" :model="form"  :rules="rules" label-width="80px" id="form" :disabled="editable">
+    <el-form ref="form" :model="form"  :rules="rules" label-width="80px" id="form" :disabled="editable" style="margin-bottom: 20px">
       <el-form-item label="头像" prop="imageurl" required>
         <el-upload
           class="avatar-uploader"
@@ -32,13 +32,13 @@
         <el-input v-model="form.signature" class="messageInput" clearable></el-input>
       </el-form-item>
       <el-form-item label="标签">
-        <Tags :input="form.tags" :closeable="closeable" @update="updateTags"></Tags>
+        <Tags :input="form.tags"  :closeable="closeable" @update="updateTags"></Tags>
       </el-form-item>
       <el-form-item label="密码" prop="pass" required>
         <el-input type="password" v-model="form.pass" autocomplete="off" clearable></el-input>
       </el-form-item>
       <el-form-item label="确认密码" prop="checkPass" required>
-        <el-input type="password" v-model="form.checkPass" autocomplete="off" clearable></el-input>
+        <el-input type="password"  v-model="form.checkPass"  auto-complete="off" clearable></el-input>
       </el-form-item>
     </el-form>
       <el-button type="primary" icon="el-icon-edit" @click.native="Edit" v-if="editable">修改</el-button>
@@ -122,7 +122,9 @@ export default {
     return {
       imageUrl: 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png',
       editable: true,
-      form: {},
+      form: {
+        tags: []
+      },
       closeable: false,
       rules: {
         imageurl: [
@@ -157,9 +159,11 @@ export default {
     this.$axios
       .get('http://localhost:8080/user/getMyInfo', {params: {userID: this.$store.state.user.id}})
       .then((response) => {
+        response.data.checkPass = ''
         that.form = response.data
-        that.form.checkPass = response.data.pass
+        that.form.checkPass = that.form.pass
         that.form.tags = JSON.parse(response.data.tags)
+        console.log(that.form)
       })
       .catch(function (error) {
         console.log(error)
@@ -211,6 +215,18 @@ export default {
             .then((response) => {
               if (response.data.info === 'success') {
                 that.$message.success('修改成功')
+                let ta = that
+                this.$axios
+                  .get('http://localhost:8080/user/getMyInfo', {params: {userID: this.$store.state.user.id}})
+                  .then((response) => {
+                    let userp = response.data
+                    ta.$cookies.set('user', userp)
+                    ta.$store.commit('editUser', userp)
+                  })
+                  .catch(function (error) {
+                    console.log(error)
+                    that.$message.error('网络错误')
+                  })
                 that.editable = true
                 that.closeable = false
                 that.reload()

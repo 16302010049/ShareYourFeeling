@@ -2,7 +2,7 @@
     <el-card id="card" >
       <el-row>
         <el-col :span="20">
-        <div id="content" @click="jumptodetail" style="cursor: pointer">{{input.content}}</div>
+        <div id="content" @click="jumptodetail" style="cursor: pointer;white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{{input.content}}</div>
         </el-col>
         <el-col :span="4">
           <el-button type="danger" icon="el-icon-delete" size="mini"  @click.native="deleteBlog" v-if="isMe">删除</el-button>

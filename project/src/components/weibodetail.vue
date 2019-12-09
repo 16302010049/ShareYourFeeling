@@ -8,8 +8,8 @@
         <el-row><div class="infor">{{info.name}}</div></el-row>
         <el-row><div class="infor">{{info.time}}</div></el-row>
       </el-col>
-      <el-col :span="2" v-if="!info.hasguanzhu"><el-button type="primary" icon="el-icon-circle-plus-outline">关注</el-button></el-col>
-      <el-col :span="2" v-if="info.hasguanzhu"><el-button type="danger" icon="el-icon-circle-close">取关</el-button></el-col>
+      <el-col :span="2" v-if="!isFollow&&!isMe"><el-button type="primary" icon="el-icon-circle-plus-outline" @click="follow">关注</el-button></el-col>
+      <el-col :span="2" v-if="isFollow&&!isMe"><el-button type="danger" icon="el-icon-circle-close" @click="unFollow">取关</el-button></el-col>
       <el-col :span="14">
         <span style="color: white">space</span>
       </el-col>
@@ -19,7 +19,7 @@
     </el-row>
     <el-row>
       <el-col :span="24">
-        <div class="content">{{info.content}}</div>
+        <div class="content" style=" word-wrap:break-word">{{info.content}}</div>
       </el-col>
     </el-row>
     <el-row v-if="info.photoUrlList.length>0">
@@ -88,7 +88,7 @@
         <el-row><div class="infor">{{comment.time}}</div></el-row>
       </el-col>
       <el-col :span="10">
-        <div class="com">{{comment.content}}</div>
+        <div class="com" style="white-space: nowrap;overflow: hidden;text-overflow: ellipsis">{{comment.content}}</div>
       </el-col>
       <el-col :span="3" v-if="userID === comment.authorID"><el-button type="danger" icon="el-icon-circle-close" size="small"  @click="deleteComment(comment.id)">删除</el-button></el-col>
     </el-row>
@@ -140,6 +140,24 @@ export default {
         if (that.info.photoUrlList.length > 0) {
           that.bigUrl = this.info.photoUrlList[0]
         }
+        let ta = that
+        let req2 = {
+          followerID: that.$store.state.user.id,
+          followID: that.info.authorID
+        }
+        this.$axios
+          .post('http://localhost:8080/follow/checkFollow', req2)
+          .then((response) => {
+            if (response.data.info === 'Yes') {
+              ta.isFollow = true
+            } else {
+              ta.isFollow = false
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+            that.$message.error('网络错误')
+          })
       }).catch(function (error) {
         console.log(error)
         that.$message.error('网络错误')
@@ -218,7 +236,8 @@ export default {
       currentPage: 1,
       userID: 0,
       isThumbsUp: false,
-      isMe: false
+      isMe: false,
+      isFollow: false
     }
   },
   methods: {
@@ -381,6 +400,51 @@ export default {
           that.$message.error('网络错误')
         })
     },
+    follow () {
+      let that = this
+      let myDate = new Date()
+      let datestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', myDate)
+      let req = {
+        followerID: this.$store.state.user.id,
+        followID: this.info.authorID,
+        time: datestr
+      }
+      this.$axios
+        .post('http://localhost:8080/follow/addFollow', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('关注成功')
+            that.isFollow = true
+          } else {
+            that.$message.error('关注失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
+    unFollow () {
+      let that = this
+      let req = {
+        followerID: this.$store.state.user.id,
+        followID: this.info.authorID
+      }
+      this.$axios
+        .post('http://localhost:8080/follow/deleteFollow', req)
+        .then((response) => {
+          if (response.data.info === 'success') {
+            that.$message.success('取关成功')
+            that.isFollow = false
+          } else {
+            that.$message.error('取关失败')
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+          that.$message.error('网络错误')
+        })
+    },
     dateFtt (fmt, date) { // author: meizz
       var o = {
         'M+': date.getMonth() + 1, // 月份
@@ -511,6 +575,7 @@ export default {
     font-size:20px;
     text-align: left;
     margin-top:20px;
+    margin-bottom: 20px;
   }
   .small-image{
     margin-left: 0;

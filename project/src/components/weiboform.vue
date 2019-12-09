@@ -44,9 +44,10 @@ export default {
   name: 'weiboform',
   data () {
     var validateDesc = (rule, value, callback) => {
-      if (value === '') {
+      var inp = value.replace(/^\n+|\n+$/g, '')
+      if (inp === '') {
         callback(new Error('请输入微博内容'))
-      } else if (value.indexOf('转发') === 0) {
+      } else if (inp.indexOf('转发') === 0) {
         callback(new Error('请勿以转发开头'))
       } else {
         callback()
@@ -110,7 +111,8 @@ export default {
             for (var i = 0; i < this.form.fileList.length; i++) {
               formdata.append('files', this.form.fileList[i].raw)
             }
-            formdata.append('content', this.form.desc)
+            let inp2 = this.form.desc.replace(/^\n+|\n+$/g, '')
+            formdata.append('content', inp2)
             formdata.append('commentNum', 0)
             formdata.append('zanNum', 0)
             formdata.append('tranNum', 0)
