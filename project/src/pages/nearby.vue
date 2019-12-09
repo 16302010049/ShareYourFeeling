@@ -75,6 +75,10 @@ export default {
       this.$message.error(StatusCode)
     },
     handleSuccess (res) {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       console.log(res)
       this.latInput = res.point.lat
       this.lngInput = res.point.lng
@@ -89,6 +93,7 @@ export default {
         .then((response) => {
           if (response.data.info === 'success') {
             that.$message.success('更新定位信息成功')
+            this.isDing = true
           } else {
             that.$message.error('更新定位信息失败')
           }
@@ -97,7 +102,6 @@ export default {
           console.log(error)
           that.$message.error('网络错误')
         })
-      this.isDing = true
     },
     searchNearBy () {
       var that = this

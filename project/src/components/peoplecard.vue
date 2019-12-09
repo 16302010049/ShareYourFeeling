@@ -88,6 +88,10 @@ export default {
   props: ['input'],
   methods: {
     follow () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let that = this
       let myDate = new Date()
       let datestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', myDate)
@@ -113,6 +117,10 @@ export default {
         })
     },
     unFollow () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let that = this
       let req = {
         followerID: this.$store.state.user.id,
@@ -159,6 +167,10 @@ export default {
       return fmt
     },
     goToMessage () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       this.$router.push('/message')
     }
   }

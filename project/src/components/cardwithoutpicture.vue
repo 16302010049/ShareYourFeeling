@@ -71,6 +71,10 @@ export default {
       this.$router.push('/detail')
     },
     mark () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let time = new Date()
       let timestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', time)
       let req = {
@@ -115,6 +119,10 @@ export default {
       return fmt
     },
     unmark () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let req = {
         userID: this.$store.state.user.id,
         blogID: this.input.id
@@ -136,6 +144,10 @@ export default {
         })
     },
     deleteBlog () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let that = this
       this.$axios
         .get('http://localhost:8080/blog/deleteBlog', {params: {blogID: this.input.id}})

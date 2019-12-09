@@ -242,6 +242,10 @@ export default {
   },
   methods: {
     mark () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let time = new Date()
       let timestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', time)
       let req = {
@@ -267,6 +271,10 @@ export default {
       console.log('jfekjf')
     },
     unmark () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let req = {
         userID: this.$store.state.user.id,
         blogID: this.info.id
@@ -288,6 +296,10 @@ export default {
         })
     },
     thumbsUp () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let req = {
         userID: this.$store.state.user.id,
         blogID: this.info.id
@@ -310,6 +322,10 @@ export default {
         })
     },
     thumbsDown () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let req = {
         userID: this.$store.state.user.id,
         blogID: this.info.id
@@ -377,6 +393,10 @@ export default {
         })
     },
     tranBlog () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let datep = new Date()
       let datestrp = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', datep)
       var that = this
@@ -401,6 +421,10 @@ export default {
         })
     },
     follow () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let that = this
       let myDate = new Date()
       let datestr = this.$options.methods.dateFtt('yyyy-MM-dd hh:mm:ss', myDate)
@@ -425,6 +449,10 @@ export default {
         })
     },
     unFollow () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       let that = this
       let req = {
         followerID: this.$store.state.user.id,
@@ -466,6 +494,10 @@ export default {
       return fmt
     },
     sendComment () {
+      if (this.$store.state.user.id === undefined) {
+        this.$message.error('未登录')
+        return
+      }
       if (this.commentInput === '') {
         this.$message.error('评论内容不能为空')
       } else {
